@@ -46,7 +46,6 @@ function EasyHttps.new()
 	self.argumentsupport = "table"
 	
 	self.janitor = require(script.Packages.Janitor).new()
-	self.version = self.janitor:Add(require(script.External.VERSION))
 
 	return setmetatable(EasyHttps, self)
 end
@@ -113,4 +112,5 @@ function EasyHttps:post(url: string, arguments: Arguments, content_type: Enum.Ht
 	return http
 end
 
+-- Finale.
 return EasyHttps.new()
