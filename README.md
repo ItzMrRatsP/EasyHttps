@@ -2,7 +2,9 @@
 Roblox HttpService wrapper, very simple and easy to use.
 
 
-API
+API:
+
+
 `:get(url, args).response()`: Returns the response of the url.
 ``args: Arguments``
 
