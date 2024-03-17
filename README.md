@@ -1,6 +1,6 @@
 # EasyHttps
 Roblox HttpService wrapper, very simple and easy to use.
-EasyHttps
+EasyHttps @ ItzMrRatsP
 
                                      
 Get Method:
