@@ -1,8 +1,8 @@
 # EasyHttps
 Roblox HttpService wrapper, very simple and easy to use.
+EasyHttps
 
-
-API                                          
+                                     
 Get Method:
 ```lua
     :get(url, args).response() -- Returns the response from url result.
