@@ -23,93 +23,86 @@ removed google method after short research on the performance.
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
 
+local Janitor = require(script.Packages.Janitor)
+
+local EXTERNAL_URL = "roproxy"
+local DEBUG_STRING = "url: %s, response: %s, body: %s, latency: %ss"
+local ARGUMENT_SUPPORT = "table"
+
 local EasyHttps = {}
 
-if (RunService:IsClient()) then
-	return setmetatable(EasyHttps, {}), warn(`Warning: {HttpService.Name} only works on **server**, move everything from client to server..`)
+if RunService:IsClient() then
+    return setmetatable(EasyHttps, {}),
+        warn(`Warning: {HttpService.Name} only works on **server**, move everything from client to server..`)
 end
 
-type Arguments = {any} | nil
+type Arguments = { any } | nil
 
 function EasyHttps.new()
-	local self = {}
-	self.__index = self
-	self.__newindex = function()
-		warn("this is a **read-only** table")
-	end
+    local self = {}
 
-	self.debugmode = false
-	self.autoclean = false
+    self.debugmode = false
+    self.autoclean = false
 
-	self.externalurl = "roproxy"
-	self.debugstring = "url: %s, response: %s, body: %s, latency: %ss"
-	self.argumentsupport = "table"
-	
-	self.janitor = require(script.Packages.Janitor).new()
+    self.get = EasyHttps.get
+    self.post = EasyHttps.post
+    self.unpack = EasyHttps.unpack
 
-	return setmetatable(EasyHttps, self)
+    self.janitor = Janitor.new()
+
+    return table.freeze(self)
 end
 
-function EasyHttps.unpack(self, arguments)
-	if (arguments == nil) then return "" end
-	if (typeof(arguments) ~= self.argumentsupport) then return warn("Argument type must be an table.") end
-	return table.unpack(arguments)
+function EasyHttps:unpack(arguments)
+    if arguments == nil then
+        return ""
+    end
+    if typeof(arguments) ~= ARGUMENT_SUPPORT then
+        return warn("Argument type must be an table.")
+    end
+    return table.unpack(arguments)
 end
 
 function EasyHttps:get(url: string, arguments: Arguments)
-	local http = {}
-	local startTime = os.time()
-	
-	local success, result = xpcall(function()
-		return HttpService:GetAsync(url:gsub("roblox", self.externalurl):format(self.unpack(self, arguments))) -- make sure to use %s for every replacement
-	end, warn)
+    local http = {}
+    local startTime = os.time()
 
-	http.response = function()
-		local response = {}
+    local success, result = xpcall(function()
+        return HttpService:GetAsync(url:gsub("roblox", EXTERNAL_URL):format(self.unpack(self, arguments))) -- make sure to use %s for every replacement
+    end, warn)
 
-		response.success = function()
-			if (success) then
-				return "Success"
-			end
+    http.success = if success then "Success" else "Failure"
+    http.response = function()
+        local response = {}
 
-			return "Failed"
-		end
+        response.get = function()
+            if http.success == "Success" then
+                return HttpService:JSONDecode(result)
+            end
+        end
 
-		response.get = function()
-			if (response.success() == "Success") then
-				return HttpService:JSONDecode(result)
-			end
-		end
-		
-		if self.debugmode then print(self.debugstring:format(url, result, self.unpack(self, arguments), (os.time() - startTime) % 60)) end
-		return response
-	end
+        if self.debugmode then
+            print(DEBUG_STRING:format(url, result, self.unpack(self, arguments), (os.time() - startTime) % 60))
+        end
+        return response
+    end
 
-	return http
+    return http
 end
 
 function EasyHttps:post(url: string, arguments: Arguments, content_type: Enum.HttpContentType, compress: boolean)
-	local http = {}
-	local success, result = xpcall(function()
-		HttpService:PostAsync(url:gsub("roblox", self.externalurl), HttpService:JSONEncode(arguments), content_type or Enum.HttpContentType.ApplicationJson, compress or false)
-	end, warn)
+    local http = {}
+    local success, result = xpcall(function()
+        HttpService:PostAsync(url:gsub("roblox", EXTERNAL_URL), HttpService:JSONEncode(arguments), content_type or Enum.HttpContentType.ApplicationJson, compress or false)
+    end, warn)
 
-	http.response = function()
-		local response = {}
+    http.success = if success then "Success" else "Failure"
 
-		response.success = function()
-			if (success) then
-				return "Success"
-			end
-
-			return "Failed"
-		end
-
-		if self.debugmode then print(self.debugstring:format(tostring(url), result, arguments, "")) end
-		return response
+	if self.debugmode then
+		print(DEBUG_STRING:format(tostring(url), result, arguments, ""))
 	end
 
-	return http
+    return http
 end
 
 -- Finale.
