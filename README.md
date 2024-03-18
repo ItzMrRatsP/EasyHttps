@@ -13,7 +13,7 @@ Get Method:
 ```
 
 ```lua
-    .response():Success() -- Returns the result of xpcall, its either success or failed.
+    .response():Success() -- Returns the result of get method, in "Success" or "Failure".
 ```
 
 Post Method:
@@ -22,5 +22,9 @@ Post Method:
 ```
 
 ```lua
-    .response():Success() -- Returns the result of xpcall, its either success or failed.
+    .response().success -- Returns the result of post method, in "Success" or "Failure".
+```
+
+```lua
+    .response():get() -- Returns the result of xpcall, its either success or failed.
 ```
