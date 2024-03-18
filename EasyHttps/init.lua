@@ -13,12 +13,20 @@ you can use any url, the "roblox" replacement is only used for roblox apis.
 --[[
 update 1.1:
 
-added support for arguments on :get() method.
-added support for arguments on :post() method
-arguments type must be an table.
-fixed few bugs.
-removed google method after short research on the performance.
++ added support for arguments on :get() method.
++ added support for arguments on :post() method
+# arguments type must be an table.
+# fixed few bugs.
+- removed google method after short research on the performance.
 --]]
+
+--[[
+update 1.11:
++ added response.get() for post method.
+# replaced response.success() from function to string response.success
+--]]
+
+-- thanks to dylwithit for rewritting some parts of the script.
 
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
@@ -76,7 +84,7 @@ function EasyHttps:get(url: string, arguments: Arguments)
 		response.success = if success then "Success" else "Failure"
 
         response.get = function()
-            if http.success == "Success" then
+            if response.success == "Success" then
                 return HttpService:JSONDecode(result)
             end
         end
@@ -103,7 +111,7 @@ function EasyHttps:post(url: string, arguments: Arguments, content_type: Enum.Ht
 		response.success = if success then "Success" else "Failure"
 
         response.get = function()
-            if http.success == "Success" then
+            if response.success == "Success" then
                 return HttpService:JSONDecode(result)
             end
         end
