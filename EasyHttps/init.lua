@@ -114,11 +114,6 @@ function EasyHttps:post(url: string, arguments: Arguments, content_type: Enum.Ht
         return response
     end
 
-
-	if self.debugmode then
-		print(DEBUG_STRING:format(tostring(url), result, arguments, ""))
-	end
-
     return http
 end
 
