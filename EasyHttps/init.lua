@@ -71,9 +71,9 @@ function EasyHttps:get(url: string, arguments: Arguments)
         return HttpService:GetAsync(url:gsub("roblox", EXTERNAL_URL):format(self.unpack(self, arguments))) -- make sure to use %s for every replacement
     end, warn)
 
-    http.success = if success then "Success" else "Failure"
     http.response = function()
         local response = {}
+		response.success = if success then "Success" else "Failure"
 
         response.get = function()
             if http.success == "Success" then
@@ -92,11 +92,28 @@ end
 
 function EasyHttps:post(url: string, arguments: Arguments, content_type: Enum.HttpContentType, compress: boolean)
     local http = {}
+	local startTime = os.time()
+	
     local success, result = xpcall(function()
         HttpService:PostAsync(url:gsub("roblox", EXTERNAL_URL), HttpService:JSONEncode(arguments), content_type or Enum.HttpContentType.ApplicationJson, compress or false)
     end, warn)
 
-    http.success = if success then "Success" else "Failure"
+    http.response = function()
+        local response = {}
+		response.success = if success then "Success" else "Failure"
+
+        response.get = function()
+            if http.success == "Success" then
+                return HttpService:JSONDecode(result)
+            end
+        end
+
+        if self.debugmode then
+            print(DEBUG_STRING:format(url, result, self.unpack(self, arguments), (os.time() - startTime) % 60))
+        end
+        return response
+    end
+
 
 	if self.debugmode then
 		print(DEBUG_STRING:format(tostring(url), result, arguments, ""))
